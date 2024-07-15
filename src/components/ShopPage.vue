@@ -2,25 +2,30 @@
   <div class="shop-page">
     <Breadcrumbs />
     <h1 class="shop-page__title">Комплекты стеллажных систем</h1>
-    <Filters />
+    <Filters 
+      :materials="materials"
+      :filters="filters"
+    />
     <div class="shop-page__products">
       <ProductCard
         v-for="product in products"
         :key="product.id"
         :product="product"
-        @add-to-favorites="handleAddToFavorites"
-        @add-to-cart="handleAddToCart"
       />
     </div>
   </div>
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue';
-import Breadcrumbs from './Breadcrumbs.vue';
-import Filters from './Filters.vue';
-import ProductCard from './ProductCard.vue';
-import items from '@/data/items.json'
+import { defineComponent, ref, computed } from 'vue';
+import { useFilterStore } from '@/stores/filters';
+
+import Breadcrumbs from '@/components/Breadcrumbs.vue';
+import Filters from '@/components/Filters.vue';
+import ProductCard from '@/components/ProductCard.vue';
+import items from '@/data/items.json';
+import material from '@/data/materials.json';
+import filter from '@/data/filters.json';
 
 export default defineComponent({
   components: {
@@ -29,22 +34,26 @@ export default defineComponent({
     ProductCard,
   },
   setup() {
-    const products = ref(items);
+    const filterStore = useFilterStore();
+    const materials = ref(material);
+    const filters = ref(filter);
 
-    const handleAddToFavorites = (product) => {
-      console.log(`Product added to favorites from ShopPage: ${product.sku}`);
-      // Ваш код для обработки добавления товара в избранное
-    };
-
-    const handleAddToCart = (product) => {
-      console.log(`Product added to cart from ShopPage: ${product.sku}`);
-      // Ваш код для обработки добавления товара в корзину
-    };
+    const products = computed(() => {
+      let filteredAndSortedProducts = items;
+      if (filterStore.material) {
+        filteredAndSortedProducts = filteredAndSortedProducts.filter(product => product.material === Number(filterStore.material));
+      }
+      return filteredAndSortedProducts.sort((a, b) => {
+        if (filterStore.sortBy === 'price-asc') return a.price.current_price - b.price.current_price
+        else if (filterStore.sortBy === 'price-desc') return b.price.current_price - a.price.current_price;
+        else return filteredAndSortedProducts;
+      });
+    });
 
     return {
       products,
-      handleAddToFavorites,
-      handleAddToCart,
+      materials,
+      filters,
     };
   },
 });

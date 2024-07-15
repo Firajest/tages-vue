@@ -1,25 +1,86 @@
 <template>
   <div class="filters">
     <div class="filters__item">
-      <label for="sort" class="filters__label">Сортировать по:</label>
+      <label for="sort"
+             class="filters__label">
+        Сортировать по:
+      </label>
       <div class="filters__select-wrapper">
-        <select id="sort" class="filters__select">
-          <option value="price">Цене</option>
-          <option value="popularity">Популярности</option>
+        <select v-model="sortBy"
+                id="sort" 
+                class="filters__select" 
+                @change="updateSortBy"
+        >
+          <option v-for="material in filters"
+                  :key="material.id"
+                  :value="material.id"
+          >
+            {{ material.name }}
+          </option>
         </select>
       </div>
     </div>
     <div class="filters__item">
-      <label for="filter" class="filters__label">Материал</label>
+      <label for="filter"
+             class="filters__label"
+      >
+        Материал
+      </label>
       <div class="filters__select-wrapper">
-        <select id="filter" class="filters__select">
-          <option value="category1">Категория 1</option>
-          <option value="category2">Категория 2</option>
+        <select v-model="material"
+                id="filter"
+                class="filters__select"
+                @change="updateMaterial"
+        >
+          <option v-for="material in materials"
+                  :key="material.id"
+                  :value="material.id"
+          >
+            {{material.name}}
+          </option>
         </select>
       </div>
     </div>
   </div>
 </template>
+
+<script>
+import { ref } from 'vue';
+import { useFilterStore } from '@/stores/filters';
+
+export default {
+  props: {
+    filters: {
+      type: Array,
+      required: true,
+    },
+    materials: {
+      type: Array,
+      required: true,
+    },
+  },
+  setup() {
+    const filterStore = useFilterStore();
+    const sortBy = ref(filterStore.sortBy);
+    const material = ref(filterStore.material);
+
+    const updateSortBy = () => {
+      filterStore.setSortBy(sortBy.value);
+    };
+
+    const updateMaterial = () => {
+      filterStore.setMaterial(material.value);
+    };
+
+    return {
+      sortBy,
+      material,
+      updateSortBy,
+      updateMaterial,
+    };
+  },
+};
+</script>
 
 <style scoped lang="scss">
 .filters {

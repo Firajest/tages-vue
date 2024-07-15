@@ -1,29 +1,44 @@
 <template>
   <article class="product-card">
-    <p v-show="product.price.old_price && product.price.current_price" class="product-card__discount">Скидка</p>
+    <p v-show="hasDiscount"
+       class="product-card__discount">
+      Скидка
+    </p>
     <div class="product-card__image-wrapper">
-      <img :src="product.image.url" :alt="product.name" class="product-card__image">
+      <img :src="product.image.url"
+           :alt="product.name" 
+           class="product-card__image">
     </div>
     <div class="product-card__details">
       <p class="product-card__code">{{ product.code }}</p>
       <p class="product-card__name">{{ product.name }}</p>
       <div class="product-card__line">
         <div class="product-card__prices">
-          <p v-show="product.price.old_price" class="product-card__price product-card__price--old">{{ product.price.old_price }}₽</p>
-          <p class="product-card__price product-card__price--current">{{ product.price.current_price }}₽</p>
+          <p v-show="product.price.old_price"
+             class="product-card__price product-card__price--old">
+             {{ product.price.old_price }}₽
+          </p>
+          <p class="product-card__price product-card__price--current">
+            {{ product.price.current_price }}₽
+          </p>
         </div>
         <div class="product-card__actions">
           <button
-            @click="addToFavorites(product)"
-            class="product-card__button product-card__button--favorite"
-          >
-            <img src="/pic/heart.svg" :alt="product.name" class="product-card__image">
-          </button>
-          <button
-            @click="addToCart(product)"
+            @click="toggleCart(product)"
             class="product-card__button product-card__button--cart"
           >
-            <img src="/pic/cart.svg" :alt="product.name" class="product-card__image">
+            <img :src="isInCart(product.id) ? '/pic/circle-checked.svg' : '/pic/cart.svg'"
+                 :alt="product.name"
+                 class="product-card__image">
+          </button>
+          <button
+            @click="toggleFavorites(product)"
+            class="product-card__button product-card__button--favorite"
+            :style="'color: red'"
+          >
+            <img :src="isInFavorites(product.id) ? '/pic/circle-checked.svg' : '/pic/heart.svg'"
+                 :alt="product.name"
+                 class="product-card__image">
           </button>
         </div>
       </div>
@@ -32,7 +47,8 @@
 </template>
 
 <script>
-import { defineComponent } from 'vue';
+import { defineComponent, computed  } from 'vue';
+import { useCartStore } from '@/stores/cart';
 
 export default defineComponent({
   props: {
@@ -42,19 +58,62 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const addToFavorites = (product) => {
-      console.log(`Product added to favorites: ${product.code}`);
-      // Код для добавления товара в избранное
-    };
+    const cartStore = useCartStore();
+
+    const hasDiscount = computed(() => {
+      return props.product.price.old_price && props.product.price.current_price;
+    });
 
     const addToCart = (product) => {
-      console.log(`Product added to cart: ${product.code}`);
-      // Код для добавления товара в корзину
+      cartStore.addToCart(product);
+    };
+
+    const removeFromCart = (productId) => {
+      cartStore.removeFromCart(productId);
+    };
+
+    const addToFavorites = (product) => {
+      cartStore.addToFavorites(product);
+    };
+
+    const removeFromFavorites = (productId) => {
+      cartStore.removeFromFavorites(productId);
+    };
+
+    const toggleCart = (product) => {
+      if (cartStore.isInCart(product.id)) {
+        cartStore.removeFromCart(product.id);
+      } else {
+        cartStore.addToCart(product);
+      }
+    };
+
+    const toggleFavorites = (product) => {
+      if (cartStore.isInFavorites(product.id)) {
+        cartStore.removeFromFavorites(product.id);
+      } else {
+        cartStore.addToFavorites(product);
+      }
+    };
+
+    const isInCart = (productId) => {
+      return cartStore.isInCart(productId);
+    };
+
+    const isInFavorites = (productId) => {
+      return cartStore.isInFavorites(productId);
     };
 
     return {
-      addToFavorites,
       addToCart,
+      removeFromCart,
+      addToFavorites,
+      removeFromFavorites,
+      toggleCart,
+      toggleFavorites,
+      isInCart,
+      isInFavorites,
+      hasDiscount,
     };
   },
 });
@@ -69,7 +128,7 @@ export default defineComponent({
   align-items: center;
   width: calc(336px - 1.5em);
   position: relative;
-  padding: .5em 0.75em 0.25em;
+  padding: .5em 0.75em;
 
   &__discount {
     position: absolute;
@@ -132,10 +191,6 @@ export default defineComponent({
       color: #888888;
 
     }
-
-    &--current {
-      // color: #e60023;
-    }
   }
     
 
@@ -143,23 +198,16 @@ export default defineComponent({
     display: flex;
     justify-content: right;
     width: 100%;
-    gap: 0.75em;
+    gap: 1.5em;
+    margin-right: 0.5em;
   }
 
   &__button {
     padding: 0;
     border: none;
     background: none;
-    width: 2.25em;
-    height: 2.25em;
-    // width: 1.5em;
-    // height: 1.5em;
-  }
-
-  &__button--favorite {
-  }
-
-  &__button--cart {
+    width: 1.35em;
+    height: 1.35em;
   }
 }
 </style>
