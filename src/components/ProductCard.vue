@@ -27,7 +27,7 @@
             @click="toggleCart(product)"
             class="product-card__button product-card__button--cart"
           >
-            <img :src="isInCart(product.id) ? '/pic/circle-checked.svg' : '/pic/cart.svg'"
+            <img :src="isInCart(product.id) ? 'pic/circle-checked.svg' : 'pic/cart.svg'"
                  :alt="product.name"
                  class="product-card__image">
           </button>
@@ -36,7 +36,7 @@
             class="product-card__button product-card__button--favorite"
             :style="'color: red'"
           >
-            <img :src="isInFavorites(product.id) ? '/pic/circle-checked.svg' : '/pic/heart.svg'"
+            <img :src="isInFavorites(product.id) ? 'pic/circle-checked.svg' : 'pic/heart.svg'"
                  :alt="product.name"
                  class="product-card__image">
           </button>
