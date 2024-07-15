@@ -11,7 +11,7 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
     "format": "prettier --write src/",
     "deploy": "gh-pages -d dist",
-    "start": "nom run build && npm run deploy"
+    "start": "npm run build && npm run deploy"
   },
   "dependencies": {
     "normalize.css": "^8.0.1",
